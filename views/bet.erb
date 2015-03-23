@@ -1,0 +1,7 @@
+<h3>How much do you wanna bet? </h3>
+<p>Money available (<%= session[:money_available] %>)</p>
+<form action="/bet" method="post">
+  <input type="text" name="bet">
+  <br />
+  <input type="submit" value="Bet">
+</form>

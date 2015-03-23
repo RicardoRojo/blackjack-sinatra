@@ -1,0 +1,48 @@
+<h3>Blackjack</h3>
+<p>Welcome <%= session[:player_name] %>!!</p>
+<p>You have bet <%= session[:bet] %>. Money available <%= session[:money_available] %> </p>
+<% if @game_ended %>
+  <p>Play again?</p>
+  <form action="/bet" id="play_again">
+    <input type="submit" value="Play" class="btn btn-success">
+  </form>
+  <form action="/game_over" id="game_over">
+    <input type="submit" value="Game Over" class="btn btn-important">
+  </form>
+<% end %>
+<div class="well">
+  <h3>Dealer Cards</h3>
+  <% session[:dealer_deck].each_with_index do |card,idx| %>
+    <% if session[:current_player] == "player" && idx == 0 %>
+      <img src="/images/cards/cover.jpg" alt="hidden card" class="card">
+    <% else %>
+      <%= show_card_image(card) %>
+    <% end %>
+  <% end %>
+
+  <% if session[:current_player] == "dealer" %>
+    <p><strong>Dealer has a total of <%= calculate_total(session[:dealer_deck]) %></strong></p>
+    <% if !@game_ended %>
+      <form action="/dealer/hit">
+        <input type="submit" value="get next card ->" class="btn btn-info">
+      </form>
+    <% end %>
+  <% end %>
+
+</div>
+
+<div class="well">
+  <h3><%= session[:player_name] %> Cards</h3>
+  <% session[:player_deck].each do |card| %>
+    <%= show_card_image(card) %>
+  <% end %>
+  <p><strong><%= session[:player_name] %> has a total of <%= calculate_total(session[:player_deck]) %></strong></p>
+  <% if session[:current_player] == "player" && !@game_ended %>
+    <form action="/player/hit" id="hit_form">
+      <input type="submit" value="Hit" class="btn btn-warning">
+    </form>
+    <form action="/player/stay" id="stay_form">
+      <input type="submit" value="Stay" class="btn btn-info">
+    </form>
+  <% end %>
+</div>

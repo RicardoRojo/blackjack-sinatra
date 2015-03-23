@@ -1,0 +1,17 @@
+img.card{
+  margin-right: 10px;
+}
+form#hit_form{
+  float: left;
+  margin-right: 10px;
+}
+form#stay_form{
+  float: left;
+}
+form#play_again{
+  float: left;
+  margin-right: 10px;
+}
+form#game_over{
+  float: left;
+}
