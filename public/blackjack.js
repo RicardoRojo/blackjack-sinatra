@@ -11,7 +11,7 @@ function hit_form(){
       url: '/player/hit',
       type: 'POST'
     }).done(function(msg){
-      $('.main').replaceWith(msg);
+      $('.maindiv').replaceWith(msg);
     });
     return false;
   });
@@ -23,7 +23,7 @@ function stay_form(){
       url: "/player/stay",
       type: "POST"
     }).done(function(msg){
-      $('.main').replaceWith(msg);
+      $('.maindiv').replaceWith(msg);
     });
     return false;
   });
@@ -34,7 +34,7 @@ function dealer_hit(){
       url: "/dealer/hit",
       type: "POST"
     }).done(function(msg){
-      $('.main').replaceWith(msg);
+      $('.maindiv').replaceWith(msg);
     });
     return false;
   });

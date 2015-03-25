@@ -8,10 +8,10 @@ BLACKJACK = 21
 DEALER_MIN_TO_STAY = 17
 PLAYER_BROKE = 0
 
-# configure :development do   
-#   set :bind, '0.0.0.0'   
-#   set :port, 3000 # Not really needed, but works well with the "Preview" menu option
-# end
+configure :development do   
+  set :bind, '0.0.0.0'   
+  set :port, 3000 # Not really needed, but works well with the "Preview" menu option
+end
 set :sessions, true
 
 helpers do
@@ -67,7 +67,7 @@ helpers do
     elsif total_player < total_dealer
       @loser = "Sorry, you lose. Your total was #{total_player}, dealer total was #{total_dealer}"
     else
-      @loser = "It´s a tie to #{total_player}"
+      @loser = "Is a tie to #{total_player}"
       increase_player_money(session[:bet])
     end
   end
