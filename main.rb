@@ -12,7 +12,10 @@ configure :development do
   set :bind, '0.0.0.0'   
   set :port, 3000 # Not really needed, but works well with the "Preview" menu option
 end
-set :sessions, true
+# set :sessions, true
+use Rack::Session::Cookie, :key => 'rack.session',
+                           :path => '/',
+                           :secret => 'blackhack'
 
 helpers do
   def give_card(deck)
