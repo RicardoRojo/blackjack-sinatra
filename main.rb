@@ -6,6 +6,7 @@ SUITS = ["clubs","spades","diamonds","hearts"]
 CARD_VALUE = ["2","3","4","5","6","7","8","9","10","ace","jack","queen","king"]
 BLACKJACK = 21
 DEALER_MIN_TO_STAY = 17
+PLAYER_BROKE = 0
 
 configure :development do   
   set :bind, '0.0.0.0'   
@@ -61,17 +62,42 @@ helpers do
     total_player = calculate_total(session[:player_deck])
     total_dealer = calculate_total(session[:dealer_deck])
     if total_player > total_dealer
-      @success = "#{session[:player_name]} Wins!!. Your total was #{total_player}, dealer total was #{total_dealer}"
-      increase_player_money(session[:bet])
+      @winner = "#{session[:player_name]} Wins!!. Your total was #{total_player}, dealer total was #{total_dealer}"
+      increase_player_money(session[:bet]*2)
     elsif total_player < total_dealer
-      @error = "Sorry, you lose. Your total was #{total_player}, dealer total was #{total_dealer}"
+      @loser = "Sorry, you lose. Your total was #{total_player}, dealer total was #{total_dealer}"
     else
-      @error = "It´s a tie to #{total_player}"
+      @loser = "It´s a tie to #{total_player}"
       increase_player_money(session[:bet])
     end
   end
+
   def increase_player_money(money)
-    session[:money_available] += money*2
+    session[:money_available] += money
+  end
+
+  def reset_bet
+    session[:bet] = 0
+  end
+
+  def game_ended!
+    @game_ended = true
+    reset_bet
+  end
+
+  def check_player_win
+    if player_win?(session[:player_deck])
+      @winner = "#{session[:player_name]} Wins!!"
+      increase_player_money(session[:bet]*2)
+      game_ended!
+    end
+  end
+
+  def check_dealer_win
+    if player_win?(session[:dealer_deck])
+      @loser = "Sorry, dealer wins!!"
+      game_ended!
+    end
   end
 end
 
@@ -82,7 +108,7 @@ before do
 end
 
 get '/' do
-  if session[:player_name] && session[:money_available] > 0
+  if session[:player_name] && session[:money_available] > PLAYER_BROKE
     redirect '/bet'
   else
     redirect '/new_player'
@@ -113,54 +139,49 @@ get '/game' do
   give_card(session[:dealer_deck])
   give_card(session[:player_deck])
   give_card(session[:dealer_deck])
-  if player_win?(session[:player_deck])
-    @success = "#{session[:player_name]} Wins!!"
-    increase_player_money(session[:bet])
-    @game_ended = true
-  end
+
+  check_player_win
+
   erb :game
 end
 
-get '/player/hit' do
+post '/player/hit' do
   give_card(session[:player_deck])
-  if player_win?(session[:player_deck])
-    @success = "#{session[:player_name]} Wins!!."
-    @game_ended = true
-    increase_player_money(session[:bet])
-  elsif player_is_busted?(session[:player_deck])
-    @error = "Sorry, #{session[:player_name]} is busted!!"
-    @game_ended = true
+  check_player_win
+
+  if player_is_busted?(session[:player_deck])
+    @loser = "Sorry, #{session[:player_name]} is busted!!"
+    game_ended!
   end
 
-  erb :game
+  erb :game, layout: false
 end
 
-get '/player/stay' do
+post '/player/stay' do
   session[:current_player] = "dealer"
-  if player_win?(session[:dealer_deck])
-    @error = "Sorry, you lose. Dealer got a blackjack"
-    @game_ended = true
-  elsif dealer_stays?
+
+  check_dealer_win
+
+  if dealer_stays?
     compare_decks
-    @game_ended = true
+    game_ended!
   end
-  erb :game
+  erb :game, layout: false
 end
 
-get '/dealer/hit' do
+post '/dealer/hit' do
   give_card(session[:dealer_deck])
-  if player_win?(session[:dealer_deck])
-    @error = "Sorry, dealer wins!!"
-    @game_ended = true
-  elsif player_is_busted?(session[:dealer_deck])
-    @success = "#{session[:player_name]} Wins. Dealer busted"
-    @game_ended = true
-    increase_player_money(session[:bet])
+  check_dealer_win
+
+  if player_is_busted?(session[:dealer_deck])
+    @winner = "#{session[:player_name]} Wins. Dealer busted"
+    increase_player_money(session[:bet]*2)
+    game_ended!
   elsif dealer_stays?
     compare_decks
-    @game_ended = true
+    game_ended!
   end
-  erb :game
+  erb :game, layout: false
 end
 
 get '/game_over' do
